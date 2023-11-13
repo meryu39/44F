@@ -22,7 +22,8 @@
     <ClCompile Include="screen.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="screen.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="turret.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
