@@ -1,4 +1,4 @@
-#pragma once
+#pragma 
 void selectTurret();
 void move();
 void move_monster();

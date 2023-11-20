@@ -1,4 +1,7 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
+#include "screen.h"
+#include "ingame.h"
+
 #include <Windows.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -6,14 +9,13 @@
 #include <conio.h>
 
 
-#include "screen.h"
-#include "ingame.h"
-
 #define WIDTH 20
 #define HEIGHT 20
 
 #define MONSTER_SPEED 1000 // 몬스터 이동 간격
 
+#define BUFFER_SIZE 1024
+static char buffer[1024];
 static int g_nScreenIndex;
 static HANDLE g_hScreen[2];
 clock_t CurTime, OldTime;
@@ -33,6 +35,7 @@ int wave = 0;
 
 int selectedTurret = 0;
 bool turretSelected = false;
+
 
 int map[HEIGHT][WIDTH] = {
     { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
@@ -76,7 +79,7 @@ void move() {
             }
             else {
                 ScreenPrint(45, 9,"바리게이트가 설치되지 않았습니다");
-   
+                ScreenFlipping();
             }
             break;
         case 224: // Arrow keys
@@ -111,6 +114,56 @@ void move() {
         }
     }
 }
+void selectTurret() {
+    while (!turretSelected) {
+        int key = _getch();
+        if (key == 32) { // Spacebar
+            turretSelected = true;
+        }
+        else if (key == 224) { // Arrow keys
+            key = _getch();
+            switch (key) {
+            case 75: // Left
+                if (selectedTurret > 0) {
+                    selectedTurret--;
+                }
+                break;
+            case 77: // Right
+                if (selectedTurret < 3) {
+                    selectedTurret++;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+
+        switch (selectedTurret) {
+        case 0:
+            ScreenPrint(57, 7, "  AR  ");
+            map[player_y][player_x] = 4;
+            break;
+        case 1:
+            ScreenPrint(57, 7, "  SMG ");
+            map[player_y][player_x] = 5;
+            break;
+        case 2:
+            ScreenPrint(57, 7, "  SR  ");
+            map[player_y][player_x] = 6;
+            break;
+        case 3:
+            ScreenPrint(57, 7, "  SG  ");
+            map[player_y][player_x] = 7;
+            break;
+        default:
+            break;
+        }
+        ScreenFlipping();
+
+
+    }
+    turretSelected = false;
+}
 
 void move_monster() {
     static DWORD previousTime = 0;
@@ -138,55 +191,7 @@ void move_monster() {
     }
 }
 
-void selectTurret() {
-    while (!turretSelected) {
-        int key = _getch();
-        if (key == 32) { // Spacebar
-            turretSelected = true;
-        }
-        else if (key == 224) { // Arrow keys
-            key = _getch();
-            switch (key) {
-            case 75: // Left
-                if (selectedTurret > 0) {
-                    selectedTurret--;
-                }
-                break;
-            case 77: // Right
-                if (selectedTurret < 3) {
-                    selectedTurret++;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-       
-        switch (selectedTurret) {
-        case 0:
-            ScreenPrint(57, 7, "  AR  ");
-            map[player_y][player_x] = 4;
-            break;
-        case 1:
-            ScreenPrint(57, 7, "  SMG ");
-            map[player_y][player_x] = 5;
-            break;
-        case 2:
-            ScreenPrint(57, 7, "  SR  ");
-            map[player_y][player_x] = 6;
-            break;
-        case 3:
-            ScreenPrint(57, 7, "  SG  ");
-            map[player_y][player_x] = 7;
-            break;
-        default:
-            break;
-        }
-       
 
-    }
-    turretSelected = false;
-}
     
 void ScreenInit() {
     CONSOLE_CURSOR_INFO cci;
@@ -215,12 +220,26 @@ void ScreenRelease() {
     CloseHandle(g_hScreen[1]);
 }
 
-void ScreenPrint(int x, int y, const char* string) {
+void ScreenPrint(int x, int y, const char* format, ...) {
     DWORD dw;
     COORD CursorPosition = { x, y };
-    SetConsoleCursorPosition(g_hScreen[g_nScreenIndex], CursorPosition);
-    WriteFile(g_hScreen[g_nScreenIndex], string, strlen(string), &dw, NULL);
 
+    // 포맷된 문자열을 저장할 버퍼 생성
+    // 필요에 따라 크기 조절
+
+    // va_list 및 vsprintf_s를 사용하여 문자열을 포맷
+    va_list args;
+    va_start(args, format);
+    vsprintf_s(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    // 커서 위치 설정 및 포맷된 문자열 작성
+    SetConsoleCursorPosition(g_hScreen[g_nScreenIndex], CursorPosition);
+    WriteFile(g_hScreen[g_nScreenIndex], buffer, strlen(buffer), &dw, NULL);
+}
+
+void SetColor(int color) {
+    SetConsoleTextAttribute(g_hScreen[g_nScreenIndex], color);
 }
 
 
@@ -233,6 +252,7 @@ void Render() {
         for (int j = 0; j < HEIGHT; j++) {
             for (int i = 0; i < WIDTH; i++) {
                 if (j == player_y && i == player_x) {
+                
                     sprintf(FPSTextInfo + index, "★ ");
                 }
                 else if (j == monster_y && i == monster_x) {
@@ -275,7 +295,6 @@ void Render() {
 
 
 
-
 void UI() {
     ScreenPrint(45, 1, "WAVE %d", wave);
     ScreenPrint(45, 3, "현재 골드 %d", money);
@@ -294,6 +313,7 @@ int main() {
     ScreenInit();
 
     while (1) {
+       
         CurTime = clock();
         Render();
         UI();
