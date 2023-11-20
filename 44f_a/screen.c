@@ -1,8 +1,13 @@
-﻿#include <Windows.h>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include <Windows.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <ctime>
-#include <iostream>
+#include <time.h>
+#include <conio.h>
+
+
+#include "screen.h"
+#include "ingame.h"
 
 #define WIDTH 20
 #define HEIGHT 20
@@ -11,13 +16,8 @@
 
 static int g_nScreenIndex;
 static HANDLE g_hScreen[2];
-int g_numofFPS;
 clock_t CurTime, OldTime;
-
-char buffer1[HEIGHT][WIDTH];
-char buffer2[HEIGHT][WIDTH];
-char(*front_buffer)[WIDTH] = buffer1;
-char(*back_buffer)[WIDTH] = buffer2;
+char FPSTextInfo[128];
 
 int player_x = 0;
 int player_y = 0;
@@ -56,18 +56,8 @@ int map[HEIGHT][WIDTH] = {
     { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
 };
 
-void gotoxy(int x, int y) {
-    COORD Pos = { x, y };
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
-}
 
-void swap_buffers() {
-    char(*temp)[WIDTH] = front_buffer;
-    front_buffer = back_buffer;
-    back_buffer = temp;
-}
 
-void selectTurret();
 
 void move() {
     if (_kbhit()) {
@@ -85,8 +75,8 @@ void move() {
                 break;
             }
             else {
-                gotoxy(45, 9);
-                printf("바리게이트가 설치되지 않았습니다");
+                ScreenPrint(45, 9,"바리게이트가 설치되지 않았습니다");
+   
             }
             break;
         case 224: // Arrow keys
@@ -171,33 +161,33 @@ void selectTurret() {
                 break;
             }
         }
-
-        gotoxy(45, 7);
-        printf("선택한 포탑: ");
+       
         switch (selectedTurret) {
         case 0:
-            printf(" AR ");
+            ScreenPrint(57, 7, "  AR  ");
             map[player_y][player_x] = 4;
             break;
         case 1:
-            printf("SMG");
+            ScreenPrint(57, 7, "  SMG ");
             map[player_y][player_x] = 5;
             break;
         case 2:
-            printf(" SR ");
+            ScreenPrint(57, 7, "  SR  ");
             map[player_y][player_x] = 6;
             break;
         case 3:
-            printf(" SG ");
+            ScreenPrint(57, 7, "  SG  ");
             map[player_y][player_x] = 7;
             break;
         default:
             break;
         }
+       
+
     }
     turretSelected = false;
 }
-
+    
 void ScreenInit() {
     CONSOLE_CURSOR_INFO cci;
     g_hScreen[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -230,69 +220,77 @@ void ScreenPrint(int x, int y, const char* string) {
     COORD CursorPosition = { x, y };
     SetConsoleCursorPosition(g_hScreen[g_nScreenIndex], CursorPosition);
     WriteFile(g_hScreen[g_nScreenIndex], string, strlen(string), &dw, NULL);
+
 }
+
 
 void Render() {
     ScreenClear();
 
     if (CurTime - OldTime >= 1000) {
-        for (int i = 0; i < WIDTH; i++) {
-            for (int j = 0; j < HEIGHT; j++) {
-                gotoxy(i * 2, j);
+        int index = 0;
+
+        for (int j = 0; j < HEIGHT; j++) {
+            for (int i = 0; i < WIDTH; i++) {
                 if (j == player_y && i == player_x) {
-                    printf("★");
+                    sprintf(FPSTextInfo + index, "★ ");
                 }
                 else if (j == monster_y && i == monster_x) {
-                    printf("M ");
+                    sprintf(FPSTextInfo + index, "M ");
                 }
                 else if (map[j][i] == 0) {
-                    printf("□");
+                    sprintf(FPSTextInfo + index, "□ ");
                 }
                 else if (map[j][i] == 3) {
-                    printf("※");
+                    sprintf(FPSTextInfo + index, "※ ");
                 }
                 else if (map[j][i] == 4) {
-                    printf("4 ");
+                    sprintf(FPSTextInfo + index, "4 ");
                 }
                 else if (map[j][i] == 5) {
-                    printf("5");
+                    sprintf(FPSTextInfo + index, "5 ");
                 }
                 else if (map[j][i] == 6) {
-                    printf("6 ");
+                    sprintf(FPSTextInfo + index, "6 ");
                 }
                 else if (map[j][i] == 7) {
-                    printf("7 ");
+                    sprintf(FPSTextInfo + index, "7 ");
                 }
+
+                index += 2;  
             }
+
+            sprintf(FPSTextInfo + index, "\n");
+            index++;  
         }
+
         OldTime = CurTime;
     }
 
-    g_numofFPS++;
-
+    ScreenPrint(0, 0, FPSTextInfo);
     ScreenFlipping();
 }
 
+
+
+
+
+
 void UI() {
-    gotoxy(45, 1);
-    printf("WAVE %d", wave);
+    ScreenPrint(45, 1, "WAVE %d", wave);
+    ScreenPrint(45, 3, "현재 골드 %d", money);
 
-    gotoxy(45, 3);
-    printf("현재 골드 %d", money);
-
-    gotoxy(45, 5);
     if (!wavetime) {
-        gotoxy(45, 8);
-        printf("포탑을 선택하려면 'e' 키를 누르고, 화살표 키로 종류를 선택하세요.");
+        ScreenPrint(45, 8, "포탑을 선택하려면 'e' 키를 누르고, 화살표 키로 종류를 선택하세요.");
     }
-    gotoxy(45, 6);
-    printf("AR  SMG  SR  SG");
-    gotoxy(45, 7);
+    
+    ScreenPrint(45, 6, "AR  SMG  SR  SG");
+    ScreenPrint(45, 7, "선택한 포탑: ");
 }
 
 int main() {
-    g_numofFPS = 0;
     CurTime = OldTime = clock();
+    memset(FPSTextInfo, '\0', 128);
     ScreenInit();
 
     while (1) {

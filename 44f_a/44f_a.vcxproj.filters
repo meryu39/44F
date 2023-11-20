@@ -18,15 +18,12 @@
     <ClCompile Include="screen.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="double.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="turret.h">
+    <ClInclude Include="screen.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="player.h">
+    <ClInclude Include="ingame.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
