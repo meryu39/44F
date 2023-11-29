@@ -59,6 +59,14 @@ typedef struct Node {
 enum NodeType {
     start = 1, vertex = 2, end = 9
 };
+typedef struct {
+    int key;
+} element;
+
+typedef struct {
+    element heap[MAX];
+    int heap_size;
+} HeapType;
 
 int found[MAX];     //다익스트라 찾은 정점 
 int distance[MAX];  //선택한 정점에서부터 다른 정점까지의 거리
@@ -68,7 +76,7 @@ int graph[MAX][MAX];//현재 맵을 그래프화 시킨것
 int direction[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 
 //이동가능한지 판단하는 함수
-bool IsMove(int x, int y) {
+bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
         // 이동 가능한 경우
         return map[y][x] == 0; 
@@ -77,15 +85,8 @@ bool IsMove(int x, int y) {
     return false;
 }
 
-void PrintDijkstra(int n) {
-    for (int i = 0; i < n; i++) {
-        printf("%d ", found[i]);
-    }
-    printf("\n");
-}
-
 //그냥 다익스트라
-void ShortestPath(int n, int start) {
+void shortestPath(int n, int start) {
     int i, j;
     int vertex = start;
     int min;
@@ -96,7 +97,6 @@ void ShortestPath(int n, int start) {
     }
 
     found[vertex] = true;
-    printDijkstra(n);
 
     for (i = 0; i < n; i++) {
 
@@ -107,29 +107,33 @@ void ShortestPath(int n, int start) {
                 vertex = j;
             }
         }
+
         distance[vertex] = 0;
         found[vertex] = true;
+        printf("%d ", vertex+1);
+
+        if (vertex == n - 1) break;
 
         for (j = 0; j < n; j++) {
             if (distance[j] > graph[vertex][j] + min) {
                 distance[j] = graph[vertex][j] + min;
             }
         }
-        printDijkstra(n);
     }
 }
 
-void MonsterPath(){
+void monsterPath(){
     int y, x;
     int dirX, dirY;
 
     int bothsides = 0;
     int updown = 0;
 
-    int i, j, k; //반복문에 쓰는 배열임다
+    int i, j, k; //반복문에 쓰는 변수임다
 
     int idx = 0;
     int weight = 0;
+    node arr[MAX];
 
     //지도 초기화
     for (y = 0; y < HEIGHT; y++) {
@@ -168,7 +172,8 @@ void MonsterPath(){
                     dirX = direction[i][X];
                     dirY = direction[i][Y];
                     if (isMove(x + dirX, y + dirY)) {
-                        i > 1 ? updown += 1 : bothsides += 1;
+                        if (i > 1)  updown += 1;
+                        else bothsides += 1;
                     }
                 }
                 if (!(updown == 2 && bothsides == 0 || updown == 0 && bothsides == 2)) {
@@ -210,18 +215,18 @@ void MonsterPath(){
                 weight++;
                 if(weight > HEIGHT){
                     perror("오류");
-                    return 0;
+                    return;
                 }
             }
         }
     }
 
-    for (int i = 0; i < idx; i++) {
+    /*for (int i = 0; i < idx; i++) {
         for (int j = 0; j < idx; j++) {
             printf("%d ", graph[i][j]);
         }
         printf("\n");
-    }
+    }*/
 
     
     // 시작점과 목적지의 인덱스 찾기 
@@ -236,14 +241,14 @@ void MonsterPath(){
             endIdx = i;
         }
     }*/
-
+    shortestPath(idx, 0);
     // 다익스트라 알고리즘 적용
-    if (startIdx != -1 && endIdx != -1) {
+    /*if (startIdx != -1 && endIdx != -1) {
         shortestPath(idx, 0);
     }
     else {
         printf("시작점 또는 목적지를 찾을 수 없습니다.\n");
-    }
+    }*/
 }
 
 void move() {
@@ -495,8 +500,9 @@ int main() {
     CurTime = OldTime = clock();
     memset(FPSTextInfo, '\0', 128);
     ScreenInit();
+    monsterPath();
 
-    while (1) {
+    /*while (1) {
        
         CurTime = clock();
         Render();
@@ -505,6 +511,6 @@ int main() {
         move_monster();
     }
 
-    ScreenRelease();
+    ScreenRelease();*/
     return 0;
 }
