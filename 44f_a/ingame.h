@@ -1,9 +1,12 @@
-#pragma 
+#pragma once
+#include "GameFoundation.h"
+
 void selectTurret();
 void move();
 void move_monster();
-void selectTurret();
 void UI();
-void printDijkstra();
-void shortestPath();
+
 void monsterPath();
+void PrintPath(int idx);
+void Dijkstra(int startNodeIdx, int goalNodeIdx);
+void InitMap();

@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="screen.c" />
+    <ClCompile Include="ingame.cpp" />
+    <ClCompile Include="screen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameFoundation.h" />
     <ClInclude Include="ingame.h" />
     <ClInclude Include="screen.h" />
   </ItemGroup>
@@ -30,6 +32,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{ab26c5f2-5102-41fc-8bbe-7dab751caa30}</ProjectGuid>
     <RootNamespace>My44fa</RootNamespace>
+    <ProjectName>44f</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
