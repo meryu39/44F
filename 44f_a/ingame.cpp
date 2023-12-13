@@ -12,7 +12,7 @@ char FPSTextInfo[1024];
 clock_t CurTime, OldTime;
 
 int money = 5500;
-int HP = 100;
+int life = 5;
 
 bool isPlaying = true;
 bool wavetime = false;
@@ -45,7 +45,6 @@ typedef struct Enemy {
     int x;
     int y;
     int hp;
-    int attack;
 } enemy;
 
 enemy enemies[MAX_ENEMIES];
@@ -60,11 +59,10 @@ typedef struct turret {
 
 
 
-void spawnEnemy(int x, int y, int hp, int attack) {
+void spawnEnemy(int x, int y, int hp) {
     enemies[numEnemies].x = x;
     enemies[numEnemies].y = y;
     enemies[numEnemies].hp = hp;
-    enemies[numEnemies].attack = attack;
     numEnemies++;
 
 }
@@ -77,7 +75,9 @@ bool isMove(int x, int y) {
     return false;
 }
 
-void InitMap() {
+void InitGame() {
+    life = 5;
+    money = 10000;
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             map[y][x] = 0;
@@ -515,6 +515,8 @@ void WaveStep() {
 }
 
 void GameControl() {
+    InitGame();
+
     ScreenInit();
     while(isPlaying){
         if (!wavetime) {
@@ -533,7 +535,6 @@ int main() {
     memset(FPSTextInfo, '\0', 1024);
 
     ScreenInit();
-    InitMap();
     int p = 0;
     
     while (1) {
@@ -542,7 +543,7 @@ int main() {
         {
         case 1:
             ScreenRelease();
-            spawnEnemy(0, 0, 10, 10);
+            spawnEnemy(0, 0, 10);
             GameControl();
 
         case 2:
