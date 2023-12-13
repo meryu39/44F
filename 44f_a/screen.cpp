@@ -23,7 +23,13 @@ void ScreenFlipping() {
 void ScreenClear() {
     COORD Coor = { 0, 0 };
     DWORD dw;
-    FillConsoleOutputCharacter(g_hScreen[g_nScreenIndex], ' ', WIDTH * HEIGHT, Coor, &dw);
+    FillConsoleOutputCharacter(g_hScreen[g_nScreenIndex], ' ', HEIGHT * WIDTH, Coor, &dw);
+}
+
+void ScreenClearAll() {
+    COORD Coor = { 0, 0 };
+    DWORD dw;
+    FillConsoleOutputCharacter(g_hScreen[g_nScreenIndex], ' ', 150 * 50, Coor, &dw);
 }
 
 void ScreenRelease() {
@@ -51,4 +57,33 @@ void ScreenPrint(int x, int y, const char* format, ...) {
 
 void SetColor(int color) {
     SetConsoleTextAttribute(g_hScreen[g_nScreenIndex], color);
+}
+
+void print_main() {
+    int center = 23;
+
+    ScreenPrint(75 - center, 5, " _   _   _    _   ___   _   _  _____ ______ \n");
+    ScreenPrint(75 - center, 6, "| \\ | | | |  | | / _ \\ | | | ||  ___|| ___ \\ \n");
+    ScreenPrint(75 - center, 7, "|  \\| | | |  | |/ /_\\ \\| | | || |__  | |_/ / \n");
+    ScreenPrint(75 - center, 8, "| . ` | | |\\/| ||  _  || | | ||  __| |    /  \n");
+    ScreenPrint(75 - center, 9, "| |\\  | \\  /\\  /| | | |\\ \\_/ /| |___ | |\\ \\ \n");
+    ScreenPrint(75 - center, 10, "\\_| \\_/  \\/  \\/ \\_| |_/ \\___/ \\____/ \\_| \\_|\n");
+
+    int center_2 = 8;
+    ScreenPrint(75 - center_2, 20, "1. 게임 시작");
+    ScreenPrint(75 - center_2, 24, "2. 게임 설명");
+    ScreenPrint(75 - center_2, 28, "3. 게임 랭킹");
+    ScreenPrint(75 - center_2, 32, "4. 게임 종료");
+
+    int center_3 = 37;
+    ScreenPrint(75 - center_3, 45, "Copyright ⓒ 2023  44F  All Content cannot be copied without permission.");
+    ScreenFlipping();
+}
+
+int MainSelected() {
+    print_main();
+    if (_kbhit) {
+        char ch = _getch();
+        return ch - '0';
+    }
 }

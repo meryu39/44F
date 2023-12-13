@@ -7,41 +7,18 @@ typedef struct Node {
     int type;
 } node; //정점의 위치와 타입를 담은 자료형
 
-
 char FPSTextInfo[1024];
 clock_t CurTime, OldTime;
 
 int money = 5500;
 int HP = 100;
 
+bool isPlaying = true;
 bool wavetime = false;
 int wave = 0;
 
 int selectedTurret = 0;
 bool turretSelected = false;
-
-//int map[WIDTH][HEIGHT] = {
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
-//};
 
 int map[HEIGHT][WIDTH];
 int map_copy[HEIGHT][WIDTH];
@@ -64,8 +41,11 @@ int visitList[MAX];
 
 int direction[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 
-bool isInstalStep = true;
-bool isPlaying = true;
+typedef struct turret {
+    int attackPower;
+    int attackRange;
+    int attackCycle;
+}Turret;
 
 bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
@@ -104,8 +84,6 @@ void selectTurret() {
                     selectedTurret++;
                 }
                 break;
-            default:
-                break;
             }
         }
 
@@ -130,7 +108,6 @@ void selectTurret() {
             break;
         }
         ScreenFlipping();
-
     }
     turretSelected = false;
 }
@@ -140,9 +117,17 @@ void move() {
         int key = _getch();
         switch (key) {
         case SPACEBAR: // Spacebar
-            if (money >= 100&&map[player_y][player_x] == EMPTY) {
+            if (player_y == 0 && player_x == 0 || player_y == HEIGHT - 1 && player_x == WIDTH - 1)
+            {
+                break;
+            }
+            if (money >= 100 && map[player_y][player_x] == EMPTY) {
                 map[player_y][player_x] = WALL;
                 money -= 100;
+            }
+            else if (map[player_y][player_x] == WALL) {
+                map[player_y][player_x] = EMPTY;
+                money -= 50;
             }
             break;
         case E: // 'e' key
@@ -156,7 +141,7 @@ void move() {
             }
             break;
         case F:
-            isInstalStep = false;
+            wavetime = true;
             break;
         case ARROWKEY: // Arrow keys
             key = _getch();
@@ -218,7 +203,34 @@ void move_monster() {
 }
 
 void UI() {
-    ScreenPrint(45, 1, "WAVE %d", wave);
+
+    ScreenPrint(4, 28, "보유 포탑");
+    for (int i = 0; i < 20; i++) {
+        ScreenPrint(50, 5 + i, "|");
+    }
+    ScreenPrint(70, 5, "%d wave", wave);
+
+    ScreenPrint(68, 8, "웨이브 단계");
+    //ScreenPrint(68, 8, "설치 단계  "); 단계에 따라 둘이 출력 번갈아가면서
+
+    ScreenPrint(55, 12, "보유 골드: %4d", money);
+
+
+    ScreenPrint(55, 23, "포탑 강화 ");
+    ScreenPrint(60, 25, "1. AR");
+    ScreenPrint(70, 25, "2. SMG");
+    ScreenPrint(80, 25, "3. SR");
+    ScreenPrint(90, 25, "4. SG   ");
+    // 해당 포탑 강화시 밑의 N이 올라감
+    ScreenPrint(60, 27, "레벨 %d"); //AR
+    ScreenPrint(70, 27, "레벨 %d"); //SMG
+    ScreenPrint(80, 27, "레벨 %d"); // SR
+    ScreenPrint(90, 27, "레벨 %d"); //SG
+
+
+    //
+   /* ScreenPrint(45, 9, "웨이브 %d", wave);
+
     ScreenPrint(45, 3, "현재 골드 %d", money);
 
     if (!wavetime) {
@@ -226,7 +238,8 @@ void UI() {
     }
 
     ScreenPrint(45, 6, "AR  SMG  SR  SG");
-    ScreenPrint(45, 7, "선택한 포탑: ");
+    ScreenPrint(45, 7, "선택한 포탑: ");*/
+
 }
 
 void Render() {
@@ -276,7 +289,7 @@ void Render() {
         OldTime = CurTime;
     }
 
-    ScreenPrint(0, 0, FPSTextInfo);
+    ScreenPrint(0, 5, FPSTextInfo);
     ScreenFlipping();
 }
 
@@ -345,7 +358,7 @@ void monsterPath() {
 
     for (y = 0; y < HEIGHT; y++) {
         for (x = 0; x < WIDTH; x++) {
-            if (map[y][x] == WALL) {
+            if (map[y][x] != EMPTY) {
                 continue;
             }
             if (x == 0 && y == 0) {
@@ -448,7 +461,7 @@ void PrintPath(int idx) {
     }*/
 }
 
-void InstalStep() {
+void InstallStep() {
     CurTime = clock();
     monsterPath();
     Render();
@@ -461,29 +474,48 @@ void WaveStep() {
 }
 
 void GameControl() {
-    if (isInstalStep) {
-        InstalStep();
-    }
-    else {
-        isPlaying = false;
+    ScreenInit();
+    while(isPlaying){
+        if (!wavetime) {
+            InstallStep();
+        }
+        else {
+            //if(checkEnemy() == 0) wavetime = false;
+
+            isPlaying = false;
+        }
     }
 }
 
 int main() {
     CurTime = OldTime = clock();
     memset(FPSTextInfo, '\0', 1024);
+
     ScreenInit();
     InitMap();
-    printf("게임시작");
-    _getch();
-
-    while (isPlaying) {
-        //GameControl();
-        CurTime = clock();
-        monsterPath();
-        Render();
-        UI();
-        move();
+    int p = 0;
+    
+    while (1) {
+        p = MainSelected();
+        switch (p)
+        {
+        case 1:
+            ScreenRelease();
+            GameControl();
+        case 2:
+            //instruction();
+            break;
+        case 3:
+            //Ranking();
+            break;
+        case 4:
+            ScreenRelease();
+            return 0;
+            break;
+        default:
+            break;
+        }
+        p = NULL;
     }
     ScreenRelease();
     return 0;
