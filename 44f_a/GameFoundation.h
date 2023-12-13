@@ -9,6 +9,7 @@
 
 #define SPACEBAR 32
 #define E 101
+#define F 102
 #define ARROWKEY 224
 
 #define UP 72
@@ -18,8 +19,9 @@
 
 #define EMPTY 0 //타일의 정보
 #define WALL 1
+#define PATH 2
 
-#define INF 9999 //이어지지 않은 정점은 무한대로
+#define INF 99999 //이어지지 않은 정점은 무한대로
 
 #define X 0
 #define Y 1
@@ -31,3 +33,10 @@
 #define MONSTER_SPEED 1000 // 몬스터 이동 간격
 
 #define BUFFER_SIZE 1024
+
+enum NodeType {
+    Void = 0, START = 1, VERTEX = 8, END = 9
+};
+typedef struct {
+    int key;
+} element;

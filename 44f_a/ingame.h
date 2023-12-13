@@ -10,3 +10,5 @@ void monsterPath();
 void PrintPath(int idx);
 void Dijkstra(int startNodeIdx, int goalNodeIdx);
 void InitMap();
+
+void PrintMain();

@@ -7,17 +7,11 @@ typedef struct Node {
     int type;
 } node; //정점의 위치와 타입를 담은 자료형
 
-enum NodeType {
-    START = 1, VERTEX = 2, END = 9
-};
-typedef struct {
-    int key;
-} element;
 
-char FPSTextInfo[128];
+char FPSTextInfo[1024];
 clock_t CurTime, OldTime;
 
-int money = 500;
+int money = 5500;
 int HP = 100;
 
 bool wavetime = false;
@@ -26,28 +20,30 @@ int wave = 0;
 int selectedTurret = 0;
 bool turretSelected = false;
 
-int map[WIDTH][HEIGHT] = {
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
-};
+//int map[WIDTH][HEIGHT] = {
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 },
+//    { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+//};
+
+int map[HEIGHT][WIDTH];
 int map_copy[HEIGHT][WIDTH];
 int vertex[HEIGHT][WIDTH]; //정점만 담은 이차원 배열
 
@@ -68,6 +64,9 @@ int visitList[MAX];
 
 int direction[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 
+bool isInstalStep = true;
+bool isPlaying = true;
+
 bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
         // 이동 가능한 경우
@@ -81,6 +80,7 @@ void InitMap() {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             map[y][x] = 0;
+            map_copy[y][x] = map[y][x];
         }
     }
 }
@@ -88,18 +88,18 @@ void InitMap() {
 void selectTurret() {
     while (!turretSelected) {
         int key = _getch();
-        if (key == 32) { // Spacebar
+        if (key == SPACEBAR) { // Spacebar
             turretSelected = true;
         }
-        else if (key == 224) { // Arrow keys
+        else if (key == ARROWKEY) { // Arrow keys
             key = _getch();
             switch (key) {
-            case 75: // Left
+            case LEFT: // Left
                 if (selectedTurret > 0) {
                     selectedTurret--;
                 }
                 break;
-            case 77: // Right
+            case RIGHT: // Right
                 if (selectedTurret < 3) {
                     selectedTurret++;
                 }
@@ -131,7 +131,6 @@ void selectTurret() {
         }
         ScreenFlipping();
 
-
     }
     turretSelected = false;
 }
@@ -140,14 +139,14 @@ void move() {
     if (_kbhit()) {
         int key = _getch();
         switch (key) {
-        case 32: // Spacebar
-            if (money >= 100) {
-                map[player_y][player_x] = 3;
+        case SPACEBAR: // Spacebar
+            if (money >= 100&&map[player_y][player_x] == EMPTY) {
+                map[player_y][player_x] = WALL;
                 money -= 100;
             }
             break;
-        case 101: // 'e' key
-            if (map[player_y][player_x] == 3) {
+        case E: // 'e' key
+            if (map[player_y][player_x] == WALL) {
                 selectTurret();
                 break;
             }
@@ -156,25 +155,28 @@ void move() {
                 ScreenFlipping();
             }
             break;
-        case 224: // Arrow keys
+        case F:
+            isInstalStep = false;
+            break;
+        case ARROWKEY: // Arrow keys
             key = _getch();
             switch (key) {
-            case 72: // Up
+            case UP: // Up
                 if (player_y != 0) {
                     player_y--;
                 }
                 break;
-            case 75: // Left
+            case LEFT: // Left
                 if (player_x != 0) {
                     player_x--;
                 }
                 break;
-            case 77: // Right
+            case RIGHT: // Right
                 if (player_x != (WIDTH - 1)) {
                     player_x++;
                 }
                 break;
-            case 80: // Down
+            case DOWN: // Down
                 if (player_y != (HEIGHT - 1)) {
                     player_y++;
                 }
@@ -230,34 +232,37 @@ void UI() {
 void Render() {
     ScreenClear();
 
-    if (CurTime - OldTime >= 1000) {
+    if (CurTime - OldTime >= 100) {
         int index = 0;
 
-        for (int j = 0; j < HEIGHT; j++) {
-            for (int i = 0; i < WIDTH; i++) {
-                if (j == player_y && i == player_x) {
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                if (y == player_y && x == player_x) {
 
                     sprintf(FPSTextInfo + index, "★ ");
                 }
-                else if (j == monster_y && i == monster_x) {
+                else if (y == monster_y && x == monster_x) {
                     sprintf(FPSTextInfo + index, "M ");
                 }
-                else if (map[j][i] == 0) {
+                else if (map_copy[y][x] == EMPTY) {
                     sprintf(FPSTextInfo + index, "□ ");
                 }
-                else if (map[j][i] == 3) {
+                else if (map_copy[y][x] == WALL) {
                     sprintf(FPSTextInfo + index, "※ ");
                 }
-                else if (map[j][i] == 4) {
+                else if (map_copy[y][x] == PATH) {
+                    sprintf(FPSTextInfo + index, "● ");
+                }
+                else if (map_copy[y][x] == 4) {
                     sprintf(FPSTextInfo + index, "4 ");
                 }
-                else if (map[j][i] == 5) {
+                else if (map_copy[y][x] == 5) {
                     sprintf(FPSTextInfo + index, "5 ");
                 }
-                else if (map[j][i] == 6) {
+                else if (map_copy[y][x] == 6) {
                     sprintf(FPSTextInfo + index, "6 ");
                 }
-                else if (map[j][i] == 7) {
+                else if (map_copy[y][x] == 7) {
                     sprintf(FPSTextInfo + index, "7 ");
                 }
 
@@ -277,24 +282,23 @@ void Render() {
 
 void Dijkstra(int startNodeIdx, int goalNodeIdx) {
 
-    // 초기화
     for (int i = 0; i < MAX; ++i) {
-        costList[i] = INF;
+        costList[i] = graph[startNodeIdx][i];
         parentList[i] = -1;
         visitList[i] = 0;
     }
 
     costList[startNodeIdx] = 0;
 
-    for (int iteration = 0; iteration < MAX - 1; ++iteration) {
+    for (int iteration = 0; iteration < MAX; iteration++) {
         int curMinimumCost = INF;
         int curNodeIdx = -1;
 
         // 최소 비용을 가진 노드 찾기
-        for (int i = 0; i < MAX; ++i) {
+        for (int i = 0; i < MAX; i++) {
             if (visitList[i]) continue;
 
-            if (curMinimumCost > costList[i]) {
+            if (curMinimumCost > costList[i]&&!visitList[i]) {
                 curMinimumCost = costList[i];
                 curNodeIdx = i;
             }
@@ -303,13 +307,14 @@ void Dijkstra(int startNodeIdx, int goalNodeIdx) {
         visitList[curNodeIdx] = 1;
 
         // 인접 노드들에 대한 최소 비용 갱신
-        for (int adjNodeIdx = 0; adjNodeIdx < MAX; ++adjNodeIdx) {
-            const int weight = graph[curNodeIdx][adjNodeIdx];
+        for (int adjNodeIdx = 0; adjNodeIdx < MAX; adjNodeIdx++) {
+
+            int weight = graph[curNodeIdx][adjNodeIdx];
 
             // 간선이 없으면 스킵
-            if (0 == weight) continue;
-
-            const int newCost = costList[curNodeIdx] + weight;
+            if (weight == 0) continue;
+            
+            int newCost = costList[curNodeIdx] + weight;
 
             if (costList[adjNodeIdx] > newCost) {
                 costList[adjNodeIdx] = newCost;
@@ -329,19 +334,18 @@ void monsterPath() {
 
     int idx = 0;
     int weight = 0;
-    int path[MAX][2];
 
     //지도 초기화
     for (y = 0; y < HEIGHT; y++) {
         for (x = 0; x < WIDTH; x++) {
-            map_copy[y][x] = map[x][y];
-            vertex[y][x] = 0;
+            map_copy[y][x] = map[y][x];
+            vertex[y][x] = -1;
         }
     }
 
     for (y = 0; y < HEIGHT; y++) {
         for (x = 0; x < WIDTH; x++) {
-            if (map[y][x] == 1) {
+            if (map[y][x] == WALL) {
                 continue;
             }
             if (x == 0 && y == 0) {
@@ -369,8 +373,8 @@ void monsterPath() {
     }
 
     // 그래프 초기화
-    for (int i = 0; i < idx; i++) {
-        for (int j = 0; j < idx; j++) {
+    for (int i = 0; i < MAX; i++) {
+        for (int j = 0; j < MAX; j++) {
             graph[i][j] = INF;
         }
     }
@@ -383,14 +387,14 @@ void monsterPath() {
             dirX = direction[j][X];
             dirY = direction[j][Y];
 
-            while (isMove(x + dirX * weight, y + dirY * weight)) {
-                k = vertex[y + dirY * weight][x + dirX * weight];
-                if (k > 0) {
-                    graph[i][k] = weight;
-                    graph[k][i] = weight;
+            while (isMove(x + dirX, y + dirY)) {
+                k = vertex[y + dirY][x + dirX];
+                if(k != -1)
+                {
+                    graph[i][k] = 1;
+                    graph[k][i] = 1;
                     break;
                 }
-                weight++;
             }
         }
     }
@@ -411,53 +415,76 @@ void monsterPath() {
     }
     else {
         printf("시작점 또는 목적지를 찾을 수 없습니다.\n");
+        exit(0);
     }
-    PrintPath(idx);
+    PrintPath(endIdx);
 }
 
 void PrintPath(int idx) {
 
-    int Dirindex[MAX][2] = { 0 };
+    //int Dirindex[MAX][2] = { 0 };  이건 나중에 쓸듯
     int nextIdx = endIdx;
+    int k = 0;
 
-    for (int i = 0; i < idx; i++) {
-        if (nextIdx == -1) break;
-        map_copy[arr[nextIdx].y][arr[nextIdx].x] = 2;
+    while(nextIdx != -1) {
+        map_copy[arr[nextIdx].y][arr[nextIdx].x] = PATH;
         nextIdx = parentList[nextIdx];
     }
-
-    for (int y = 0; y < HEIGHT; y++) {
+    /*for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             switch (map_copy[y][x])
             {
-            case 0:
+            case EMPTY:
                 printf("□");
                 break;
-            case 1:
+            case WALL:
                 printf("■");
                 break;
-            case 2:
+            case PATH:
                 printf("★");
             }
         }
         printf("\n");
+    }*/
+}
+
+void InstalStep() {
+    CurTime = clock();
+    monsterPath();
+    Render();
+    UI();
+    move();
+}
+
+void WaveStep() {
+
+}
+
+void GameControl() {
+    if (isInstalStep) {
+        InstalStep();
+    }
+    else {
+        isPlaying = false;
     }
 }
 
 int main() {
     CurTime = OldTime = clock();
-    memset(FPSTextInfo, '\0', 128);
+    memset(FPSTextInfo, '\0', 1024);
     ScreenInit();
+    InitMap();
+    printf("게임시작");
+    _getch();
 
-    while (1) {
-
+    while (isPlaying) {
+        //GameControl();
         CurTime = clock();
+        monsterPath();
         Render();
         UI();
         move();
-        move_monster();
     }
-
     ScreenRelease();
     return 0;
 }
