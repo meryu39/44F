@@ -6,11 +6,19 @@
 #include <stdbool.h>
 #include <time.h>
 #include <conio.h>
+#include <math.h>
 
 #define SPACEBAR 32
 #define E 101
 #define F 102
 #define ARROWKEY 224
+
+#define KEY1 49
+#define KEY2 50
+#define KEY3 51
+#define KEY4 52
+
+#define MAXLEVEL 20
 
 #define UP 72
 #define LEFT 75
@@ -20,6 +28,15 @@
 #define EMPTY 0 //타일의 정보
 #define WALL 1
 #define PATH 2
+
+#define AR 4
+#define ARAttack 20
+#define SMG 5
+#define SMGAttack 10
+#define SR 6
+#define SRAttack 50
+#define SG 7
+#define SGAttack 40
 
 #define INF 99999 //이어지지 않은 정점은 무한대로
 

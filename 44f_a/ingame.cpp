@@ -51,20 +51,32 @@ typedef struct Enemy {
 typedef struct turret {
     int x;
     int y;
+    int type;
     int attackPower;
     int attackRange;
     int attackCycle;
 }Turret;
 
+typedef struct level {
+    int ARLevel = 0;
+    int SMGLevel = 0;
+    int SGLevel = 0;
+    int SRLevel = 0;
+}Level;
+
 
 enemy enemies[MAX_ENEMIES];
 int numEnemies = 0;
+
+Level turretLevel;
 
 Turret turreties[MAX];
 int numTurreties = 0;
 
 int distance;
 int range;
+
+bool barricadeCaution = false;
 
 void spawnEnemy(int x, int y, int hp) {
     enemies[numEnemies].x = x;
@@ -74,13 +86,64 @@ void spawnEnemy(int x, int y, int hp) {
     numEnemies++;
 
 }
-void spawnTurret(int x, int y, int attackPower, int attackRange) {
+void spawnTurret(int x, int y, int attackPower, int attackRange, int type) {
     turreties[numTurreties].x = x;
     turreties[numTurreties].y = y;
+    turreties[numTurreties].type = type;
     turreties[numTurreties].attackPower = attackPower;
     turreties[numTurreties].attackRange = attackRange;
     numTurreties++;
 
+}
+
+void levelup(int type) {
+    
+    switch (type) {
+    case AR:
+        if (turretLevel.ARLevel == MAXLEVEL ||
+            money < 20 * pow(1.2, turretLevel.ARLevel)) return;
+        
+        money -= 20 * pow(1.2, turretLevel.ARLevel);
+        turretLevel.ARLevel++;
+        for (int i = 0; i < numTurreties; i++) {
+            if (turreties->type == AR) continue;
+            turreties[i].attackPower = turretLevel.ARLevel + ARAttack;
+        }
+        break;
+    case SMG:
+        if (turretLevel.SMGLevel == MAXLEVEL ||
+            money < 20 * pow(1.2, turretLevel.SMGLevel)) return;
+
+        money -= 20 * pow(1.2, turretLevel.SMGLevel);
+        turretLevel.SMGLevel++;
+        for (int i = 0; i < numTurreties; i++) {
+            if (turreties->type != SMG) continue;
+            turreties[i].attackPower = turretLevel.SMGLevel + SMGAttack;
+        }
+        break;
+    case SR:
+        if (turretLevel.SRLevel == MAXLEVEL ||
+            money < 20 * pow(1.2, turretLevel.SRLevel)) return;
+
+        money -= 20 * pow(1.2, turretLevel.SRLevel);
+        turretLevel.SRLevel++;
+        for (int i = 0; i < numTurreties; i++) {
+            if (turreties->type == SR) continue;
+            turreties[i].attackPower = turretLevel.SRLevel + SRAttack;
+        }
+        break;
+    case SG:
+        if(turretLevel.SGLevel == MAXLEVEL ||
+            money < 20 * pow(1.2, turretLevel.SGLevel)) return;
+
+        money -= 20 * pow(1.2, turretLevel.SGLevel);
+        turretLevel.SGLevel++;
+        for (int i = 0; i < numTurreties; i++) {
+            if (turreties->type == SG) continue;
+            turreties[i].attackPower = turretLevel.SGLevel + SGAttack;
+        }
+        break;
+    }
 }
 bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
@@ -94,6 +157,12 @@ bool isMove(int x, int y) {
 void InitGame() {
     life = 5;
     money = 10000;
+
+    turretLevel.ARLevel = 0;
+    turretLevel.SMGLevel = 0;
+    turretLevel.SGLevel = 0; 
+    turretLevel.SRLevel = 0;
+
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             map[y][x] = 0;
@@ -135,7 +204,7 @@ void moveEnemies() {
         static DWORD previousTime = 0;
         DWORD currentTime = GetTickCount64();
 
-        if (currentTime - previousTime >= 500) {
+        if (currentTime - previousTime >= 1000) {
             for (int i = 0; i < numEnemies; i++) {
                 int currentX = enemies[i].x;
                 int currentY = enemies[i].y;
@@ -157,8 +226,6 @@ void moveEnemies() {
                         map_copy[currentY][currentX] = PATH;
                         map_copy[currentY + dirY][currentX + dirX] = 4;
 
-
-
                         break;
                     }
                 }
@@ -169,48 +236,43 @@ void moveEnemies() {
 
 
 void selectTurret() {
+    int currentattack = 0;
     while (!turretSelected) {
-        int key = _getch();
-        if (key == SPACEBAR) { // Spacebar
-            turretSelected = true;
-        }
-        else if (key == ARROWKEY) { // Arrow keys
-            key = _getch();
-            switch (key) {
-            case LEFT: // Left
-                if (selectedTurret > 0) {
-                    selectedTurret--;
-                }
-                break;
-            case RIGHT: // Right
-                if (selectedTurret < 3) {
-                    selectedTurret++;
-                }
-                break;
-            }
-        }
+        int selectedTurret = rand() % 4;
+        turretSelected = true;
 
         switch (selectedTurret) {
         case 0:
             ScreenPrint(57, 7, "  AR  ");
-            map[player_y][player_x] = 4;
-            spawnTurret(player_x, player_y, 3, 3);
-            
+            ScreenFlipping();
+            ScreenPrint(57, 7, "  AR  ");
+            map[player_y][player_x] = AR;
+            currentattack = turretLevel.ARLevel + ARAttack;
+            spawnTurret(player_x, player_y, currentattack, 3, AR);
             break;
         case 1:
             ScreenPrint(57, 7, "  SMG ");
-            map[player_y][player_x] = 5;
-            spawnTurret(player_x, player_y, 1, 2);
+            ScreenFlipping();
+            ScreenPrint(57, 7, "  SMG ");
+            map[player_y][player_x] = SMG;
+            currentattack = turretLevel.SMGLevel + SMGAttack;
+            spawnTurret(player_x, player_y, currentattack, 2, SMG);
             break;
         case 2:
             ScreenPrint(57, 7, "  SR  ");
-            map[player_y][player_x] = 6;
-            spawnTurret(player_x, player_y, 5, 5);
+            ScreenFlipping();
+            ScreenPrint(57, 7, "  SR  ");
+            map[player_y][player_x] = SR;
+            currentattack = turretLevel.SRLevel + SRAttack;
+            spawnTurret(player_x, player_y, currentattack, 5, SR);
             break;
         case 3:
             ScreenPrint(57, 7, "  SG  ");
-            map[player_y][player_x] = 7;
-            spawnTurret(player_x, player_y, 100, 1);
+            ScreenFlipping();
+            ScreenPrint(57, 7, "  SG  ");
+            map[player_y][player_x] = SG;
+            currentattack = turretLevel.SGLevel + SGAttack;
+            spawnTurret(player_x, player_y, currentattack, 1, SG);
             break;
         default:
             break;
@@ -224,6 +286,18 @@ void move() {
     if (_kbhit()) {
         int key = _getch();
         switch (key) {
+        case KEY1:
+            levelup(AR);
+            break;
+        case KEY2:
+            levelup(SMG);
+            break;
+        case KEY3:
+            levelup(SR);
+            break;
+        case KEY4:
+            levelup(SG);
+            break;
         case SPACEBAR: // Spacebar
             if (player_y == 0 && player_x == 0 || player_y == HEIGHT - 1 && player_x == WIDTH - 1)
             {
@@ -244,8 +318,7 @@ void move() {
                 break;
             }
             else {
-                ScreenPrint(45, 9, "바리게이트가 설치되지 않았습니다");
-                ScreenFlipping();
+                barricadeCaution = true;
             }
             break;
         case F:
@@ -285,43 +358,50 @@ void move() {
 }
 
 
+
 void UI() {
 
-    ScreenPrint(4, 28, "보유 포탑");
+    ScreenPrint(4, 28, "보유 포탑 : %3d", numTurreties);
+    ScreenPrint(4, 30, "남은 적의 수 포탑 : %3d", numEnemies);
+
     for (int i = 0; i < 20; i++) {
         ScreenPrint(50, 5 + i, "|");
     }
-    ScreenPrint(70, 5, "%d wave", wave);
+    ScreenPrint(70, 5, "%d wave", wave + 1);
 
-    ScreenPrint(68, 8, "웨이브 단계");
-    //ScreenPrint(68, 8, "설치 단계  "); 단계에 따라 둘이 출력 번갈아가면서
-
-    ScreenPrint(55, 12, "보유 골드: %4d", money);
-
-
-    ScreenPrint(55, 23, "포탑 강화 ");
-    ScreenPrint(60, 25, "1. AR");
-    ScreenPrint(70, 25, "2. SMG");
-    ScreenPrint(80, 25, "3. SR");
-    ScreenPrint(90, 25, "4. SG   ");
-    // 해당 포탑 강화시 밑의 N이 올라감
-    ScreenPrint(60, 27, "레벨 %d"); //AR
-    ScreenPrint(70, 27, "레벨 %d"); //SMG
-    ScreenPrint(80, 27, "레벨 %d"); // SR
-    ScreenPrint(90, 27, "레벨 %d"); //SG
-
-
-    //
-   /* ScreenPrint(45, 9, "웨이브 %d", wave);
-
-    ScreenPrint(45, 3, "현재 골드 %d", money);
-
-    if (!wavetime) {
-        ScreenPrint(45, 8, "포탑을 선택하려면 'e' 키를 누르고, 화살표 키로 종류를 선택하세요.");
+    if (wavetime) { 
+        ScreenPrint(68, 8, "웨이브 단계"); 
+    }else{ 
+        ScreenPrint(68, 8, "설치 단계  "); 
     }
 
-    ScreenPrint(45, 6, "AR  SMG  SR  SG");
-    ScreenPrint(45, 7, "선택한 포탑: ");*/
+    ScreenPrint(55, 12, "보유 골드: %5d", money);
+
+    if(barricadeCaution)    ScreenPrint(54, 10, " 바리게이트위에 설치되지 않았습니다");
+    else ScreenPrint(54, 10, "                                        ");
+
+    ScreenPrint(55, 21, "포탑 강화 ");
+    ScreenPrint(60, 23, "1. AR");
+    ScreenPrint(70, 23, "2. SMG");
+    ScreenPrint(80, 23, "3. SR");
+    ScreenPrint(90, 23, "4. SG");
+
+    ScreenPrint(60, 25, "레벨 : %d", turretLevel.ARLevel);
+    ScreenPrint(70, 25, "레벨 : %d", turretLevel.SMGLevel);
+    ScreenPrint(80, 25, "레벨 : %d", turretLevel.SGLevel);
+    ScreenPrint(90, 25, "레벨 : %d", turretLevel.SRLevel);
+
+    
+   /* ScreenPrint(50, 9, "웨이브 %d", wave);
+
+    ScreenPrint(50, 3, "현재 골드 %d", money);
+
+    if (!wavetime) {
+        ScreenPrint(50, 8, "포탑을 선택하려면 'e' 키를 누르고, 화살표 키로 종류를 선택하세요.");
+    }
+
+    ScreenPrint(50, 6, "AR  SMG  SR  SG");
+    ScreenPrint(50, 7, "선택한 포탑: ");*/
 
 }
 
@@ -525,7 +605,6 @@ void monsterPath() {
 
 void PrintPath(int idx) {
 
-    //int Dirindex[MAX][2] = { 0 };  이건 나중에 쓸듯
     int nextIdx = endIdx;
     int k = 0;
 
@@ -533,22 +612,6 @@ void PrintPath(int idx) {
         map_copy[arr[nextIdx].y][arr[nextIdx].x] = PATH;
         nextIdx = parentList[nextIdx];
     }
-    /*for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            switch (map_copy[y][x])
-            {
-            case EMPTY:
-                printf("□");
-                break;
-            case WALL:
-                printf("■");
-                break;
-            case PATH:
-                printf("★");
-            }
-        }
-        printf("\n");
-    }*/
 }
 
 void InstallStep() {
@@ -557,6 +620,7 @@ void InstallStep() {
     Render();
     move();
 }
+
 void spawnEnemyWave(int wave) {
     static DWORD previousSpawnTime = 0;
     DWORD currentTime = GetTickCount64();
@@ -568,18 +632,12 @@ void spawnEnemyWave(int wave) {
             int spawnY = 0;
             int enemyHP = 100 + wave * 100;
             
-
-
             spawnEnemy(spawnX, spawnY, enemyHP);
 
             // Update the spawn time
             previousSpawnTime = currentTime;
         }
     }
-}
-void WaveStep() {
-    
-
 }
 
 
@@ -588,23 +646,19 @@ void GameControl() {
     ScreenInit();
     while(isPlaying){
         CurTime = clock();
-        move();
         UI();
-        monsterPath();
 
         if (!wavetime) {
             InstallStep();
         }
         else {
             //if(checkEnemy() == 0) wavetime = false;
-            
             spawnEnemyWave(wave);
             
             collider();
             Render();
             moveEnemies();
             
-
         }
     }
 }
@@ -622,7 +676,6 @@ int main() {
         {
         case 1:
             ScreenRelease();
-
             GameControl();
 
         case 2:

@@ -83,7 +83,7 @@ void print_main() {
 int MainSelected() {
     print_main();
     if (_kbhit) {
-        char ch = _getch();
+        int ch = _getch();
         return ch - '0';
     }
 }
