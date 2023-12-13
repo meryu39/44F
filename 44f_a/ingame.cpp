@@ -1,11 +1,11 @@
-#include "ingame.h"
+ï»¿#include "ingame.h"
 #include "screen.h"
 
 typedef struct Node {
     int x;
     int y;
     int type;
-} node; //Á¤Á¡ÀÇ À§Ä¡¿Í Å¸ÀÔ¸¦ ´ãÀº ÀÚ·áÇü
+} node; //ì •ì ì˜ ìœ„ì¹˜ì™€ íƒ€ìž…ë¥¼ ë‹´ì€ ìžë£Œí˜•
 
 char FPSTextInfo[1024];
 clock_t CurTime, OldTime;
@@ -22,7 +22,7 @@ bool turretSelected = false;
 
 int map[HEIGHT][WIDTH];
 int map_copy[HEIGHT][WIDTH];
-int vertex[HEIGHT][WIDTH]; //Á¤Á¡¸¸ ´ãÀº ÀÌÂ÷¿ø ¹è¿­
+int vertex[HEIGHT][WIDTH]; //ì •ì ë§Œ ë‹´ì€ ì´ì°¨ì› ë°°ì—´
 
 int player_x = 0;
 int player_y = 0;
@@ -49,10 +49,10 @@ typedef struct turret {
 
 bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
-        // ÀÌµ¿ °¡´ÉÇÑ °æ¿ì
+        // ì´ë™ ê°€ëŠ¥í•œ ê²½ìš°
         return map[y][x] == 0;
     }
-    // ¹üÀ§¸¦ ¹þ¾î³ª°Å³ª ÀÌµ¿ ºÒ°¡´ÉÇÑ °æ¿ì
+    // ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ê±°ë‚˜ ì´ë™ ë¶ˆê°€ëŠ¥í•œ ê²½ìš°
     return false;
 }
 
@@ -136,7 +136,7 @@ void move() {
                 break;
             }
             else {
-                ScreenPrint(45, 9, "¹Ù¸®°ÔÀÌÆ®°¡ ¼³Ä¡µÇÁö ¾Ê¾Ò½À´Ï´Ù");
+                ScreenPrint(45, 9, "ë°”ë¦¬ê²Œì´íŠ¸ê°€ ì„¤ì¹˜ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤");
                 ScreenFlipping();
             }
             break;
@@ -204,41 +204,41 @@ void move_monster() {
 
 void UI() {
 
-    ScreenPrint(4, 28, "º¸À¯ Æ÷Å¾");
+    ScreenPrint(4, 28, "ë³´ìœ  í¬íƒ‘");
     for (int i = 0; i < 20; i++) {
         ScreenPrint(50, 5 + i, "|");
     }
     ScreenPrint(70, 5, "%d wave", wave);
 
-    ScreenPrint(68, 8, "¿þÀÌºê ´Ü°è");
-    //ScreenPrint(68, 8, "¼³Ä¡ ´Ü°è  "); ´Ü°è¿¡ µû¶ó µÑÀÌ Ãâ·Â ¹ø°¥¾Æ°¡¸é¼­
+    ScreenPrint(68, 8, "ì›¨ì´ë¸Œ ë‹¨ê³„");
+    //ScreenPrint(68, 8, "ì„¤ì¹˜ ë‹¨ê³„  "); ë‹¨ê³„ì— ë”°ë¼ ë‘˜ì´ ì¶œë ¥ ë²ˆê°ˆì•„ê°€ë©´ì„œ
 
-    ScreenPrint(55, 12, "º¸À¯ °ñµå: %4d", money);
+    ScreenPrint(55, 12, "ë³´ìœ  ê³¨ë“œ: %4d", money);
 
 
-    ScreenPrint(55, 23, "Æ÷Å¾ °­È­ ");
+    ScreenPrint(55, 23, "í¬íƒ‘ ê°•í™” ");
     ScreenPrint(60, 25, "1. AR");
     ScreenPrint(70, 25, "2. SMG");
     ScreenPrint(80, 25, "3. SR");
     ScreenPrint(90, 25, "4. SG   ");
-    // ÇØ´ç Æ÷Å¾ °­È­½Ã ¹ØÀÇ NÀÌ ¿Ã¶ó°¨
-    ScreenPrint(60, 27, "·¹º§ %d"); //AR
-    ScreenPrint(70, 27, "·¹º§ %d"); //SMG
-    ScreenPrint(80, 27, "·¹º§ %d"); // SR
-    ScreenPrint(90, 27, "·¹º§ %d"); //SG
+    // í•´ë‹¹ í¬íƒ‘ ê°•í™”ì‹œ ë°‘ì˜ Nì´ ì˜¬ë¼ê°
+    ScreenPrint(60, 27, "ë ˆë²¨ %d"); //AR
+    ScreenPrint(70, 27, "ë ˆë²¨ %d"); //SMG
+    ScreenPrint(80, 27, "ë ˆë²¨ %d"); // SR
+    ScreenPrint(90, 27, "ë ˆë²¨ %d"); //SG
 
 
     //
-   /* ScreenPrint(45, 9, "¿þÀÌºê %d", wave);
+   /* ScreenPrint(45, 9, "ì›¨ì´ë¸Œ %d", wave);
 
-    ScreenPrint(45, 3, "ÇöÀç °ñµå %d", money);
+    ScreenPrint(45, 3, "í˜„ìž¬ ê³¨ë“œ %d", money);
 
     if (!wavetime) {
-        ScreenPrint(45, 8, "Æ÷Å¾À» ¼±ÅÃÇÏ·Á¸é 'e' Å°¸¦ ´©¸£°í, È­»ìÇ¥ Å°·Î Á¾·ù¸¦ ¼±ÅÃÇÏ¼¼¿ä.");
+        ScreenPrint(45, 8, "í¬íƒ‘ì„ ì„ íƒí•˜ë ¤ë©´ 'e' í‚¤ë¥¼ ëˆ„ë¥´ê³ , í™”ì‚´í‘œ í‚¤ë¡œ ì¢…ë¥˜ë¥¼ ì„ íƒí•˜ì„¸ìš”.");
     }
 
     ScreenPrint(45, 6, "AR  SMG  SR  SG");
-    ScreenPrint(45, 7, "¼±ÅÃÇÑ Æ÷Å¾: ");*/
+    ScreenPrint(45, 7, "ì„ íƒí•œ í¬íƒ‘: ");*/
 
 }
 
@@ -252,19 +252,19 @@ void Render() {
             for (int x = 0; x < WIDTH; x++) {
                 if (y == player_y && x == player_x) {
 
-                    sprintf(FPSTextInfo + index, "¡Ú ");
+                    sprintf(FPSTextInfo + index, "â˜… ");
                 }
                 else if (y == monster_y && x == monster_x) {
                     sprintf(FPSTextInfo + index, "M ");
                 }
                 else if (map_copy[y][x] == EMPTY) {
-                    sprintf(FPSTextInfo + index, "¡à ");
+                    sprintf(FPSTextInfo + index, "â–¡ ");
                 }
                 else if (map_copy[y][x] == WALL) {
-                    sprintf(FPSTextInfo + index, "¡Ø ");
+                    sprintf(FPSTextInfo + index, "â€» ");
                 }
                 else if (map_copy[y][x] == PATH) {
-                    sprintf(FPSTextInfo + index, "¡Ü ");
+                    sprintf(FPSTextInfo + index, "â— ");
                 }
                 else if (map_copy[y][x] == 4) {
                     sprintf(FPSTextInfo + index, "4 ");
@@ -307,7 +307,7 @@ void Dijkstra(int startNodeIdx, int goalNodeIdx) {
         int curMinimumCost = INF;
         int curNodeIdx = -1;
 
-        // ÃÖ¼Ò ºñ¿ëÀ» °¡Áø ³ëµå Ã£±â
+        // ìµœì†Œ ë¹„ìš©ì„ ê°€ì§„ ë…¸ë“œ ì°¾ê¸°
         for (int i = 0; i < MAX; i++) {
             if (visitList[i]) continue;
 
@@ -316,15 +316,15 @@ void Dijkstra(int startNodeIdx, int goalNodeIdx) {
                 curNodeIdx = i;
             }
         }
-        if (curNodeIdx == -1) break; // ¸ðµç ³ëµå¸¦ ¹æ¹®ÇßÀ» ¶§ Á¾·á
+        if (curNodeIdx == -1) break; // ëª¨ë“  ë…¸ë“œë¥¼ ë°©ë¬¸í–ˆì„ ë•Œ ì¢…ë£Œ
         visitList[curNodeIdx] = 1;
 
-        // ÀÎÁ¢ ³ëµåµé¿¡ ´ëÇÑ ÃÖ¼Ò ºñ¿ë °»½Å
+        // ì¸ì ‘ ë…¸ë“œë“¤ì— ëŒ€í•œ ìµœì†Œ ë¹„ìš© ê°±ì‹ 
         for (int adjNodeIdx = 0; adjNodeIdx < MAX; adjNodeIdx++) {
 
             int weight = graph[curNodeIdx][adjNodeIdx];
 
-            // °£¼±ÀÌ ¾øÀ¸¸é ½ºÅµ
+            // ê°„ì„ ì´ ì—†ìœ¼ë©´ ìŠ¤í‚µ
             if (weight == 0) continue;
             
             int newCost = costList[curNodeIdx] + weight;
@@ -348,7 +348,7 @@ void monsterPath() {
     int idx = 0;
     int weight = 0;
 
-    //Áöµµ ÃÊ±âÈ­
+    //ì§€ë„ ì´ˆê¸°í™”
     for (y = 0; y < HEIGHT; y++) {
         for (x = 0; x < WIDTH; x++) {
             map_copy[y][x] = map[y][x];
@@ -385,7 +385,7 @@ void monsterPath() {
         }
     }
 
-    // ±×·¡ÇÁ ÃÊ±âÈ­
+    // ê·¸ëž˜í”„ ì´ˆê¸°í™”
     for (int i = 0; i < MAX; i++) {
         for (int j = 0; j < MAX; j++) {
             graph[i][j] = INF;
@@ -411,7 +411,7 @@ void monsterPath() {
             }
         }
     }
-    // ½ÃÀÛÁ¡°ú ¸ñÀûÁöÀÇ ÀÎµ¦½º Ã£±â
+    // ì‹œìž‘ì ê³¼ ëª©ì ì§€ì˜ ì¸ë±ìŠ¤ ì°¾ê¸°
 
     for (int i = 0; i < idx; i++) {
         if (arr[i].type == START) {
@@ -422,12 +422,12 @@ void monsterPath() {
         }
     }
 
-    // ´ÙÀÍ½ºÆ®¶ó ¾Ë°í¸®Áò Àû¿ë
+    // ë‹¤ìµìŠ¤íŠ¸ë¼ ì•Œê³ ë¦¬ì¦˜ ì ìš©
     if (startIdx != -1 && endIdx != -1) {
         Dijkstra(startIdx, endIdx);
     }
     else {
-        printf("½ÃÀÛÁ¡ ¶Ç´Â ¸ñÀûÁö¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.\n");
+        printf("ì‹œìž‘ì  ë˜ëŠ” ëª©ì ì§€ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n");
         exit(0);
     }
     PrintPath(endIdx);
@@ -435,7 +435,7 @@ void monsterPath() {
 
 void PrintPath(int idx) {
 
-    //int Dirindex[MAX][2] = { 0 };  ÀÌ°Ç ³ªÁß¿¡ ¾µµí
+    //int Dirindex[MAX][2] = { 0 };  ì´ê±´ ë‚˜ì¤‘ì— ì“¸ë“¯
     int nextIdx = endIdx;
     int k = 0;
 
@@ -448,13 +448,13 @@ void PrintPath(int idx) {
             switch (map_copy[y][x])
             {
             case EMPTY:
-                printf("¡à");
+                printf("â–¡");
                 break;
             case WALL:
-                printf("¡á");
+                printf("â– ");
                 break;
             case PATH:
-                printf("¡Ú");
+                printf("â˜…");
             }
         }
         printf("\n");
