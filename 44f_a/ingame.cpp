@@ -1,5 +1,6 @@
 ﻿#include "ingame.h"
 #include "screen.h"
+#define MAX_ENEMIES 5
 
 typedef struct Node {
     int x;
@@ -24,11 +25,10 @@ int map[HEIGHT][WIDTH];
 int map_copy[HEIGHT][WIDTH];
 int vertex[HEIGHT][WIDTH]; //정점만 담은 이차원 배열
 
-int player_x = 0;
-int player_y = 0;
+int player_x = 19;
+int player_y = 19;
 
-int monster_x = 0;
-int monster_y = 0;
+
 
 int startIdx = -1, endIdx = -1;
 
@@ -39,7 +39,17 @@ int costList[MAX];
 int parentList[MAX];
 int visitList[MAX];
 
-int direction[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+int direction[4][2] = { {1, 0},{0, 1}, {-1, 0}, {0, -1} };
+
+typedef struct Enemy {
+    int x;
+    int y;
+    int hp;
+    int attack;
+} enemy;
+
+enemy enemies[MAX_ENEMIES];
+int numEnemies = 0;
 
 typedef struct turret {
     int attackPower;
@@ -47,6 +57,17 @@ typedef struct turret {
     int attackCycle;
 }Turret;
 
+
+
+
+void spawnEnemy(int x, int y, int hp, int attack) {
+    enemies[numEnemies].x = x;
+    enemies[numEnemies].y = y;
+    enemies[numEnemies].hp = hp;
+    enemies[numEnemies].attack = attack;
+    numEnemies++;
+
+}
 bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
         // 이동 가능한 경우
@@ -64,6 +85,43 @@ void InitMap() {
         }
     }
 }
+
+void moveEnemies() {
+
+        static DWORD previousTime = 0;
+        DWORD currentTime = GetTickCount64();
+
+        if (currentTime - previousTime >= 300) {
+            for (int i = 0; i < numEnemies; i++) {
+                int currentX = enemies[i].x;
+                int currentY = enemies[i].y;
+
+                for (int j = 0; j < 4; j++) {
+                    int dirX = direction[j][X];
+                    int dirY = direction[j][Y];
+
+                    int nextX = currentX + dirX;
+                    int nextY = currentY + dirY;
+
+                    if (isMove(currentX + dirX, currentY + dirY) &&
+                        map_copy[currentY + dirY][currentX + dirX] == PATH) {
+
+                        enemies[i].x = currentX + dirX;
+                        enemies[i].y = currentY + dirY;
+
+                        map_copy[currentY][currentX] = PATH;
+                        map_copy[currentY + dirY][currentX + dirX] = 4;
+
+
+
+                        break;
+                    }
+                }
+            }
+            previousTime = currentTime;
+        }
+    }
+
 
 void selectTurret() {
     while (!turretSelected) {
@@ -176,31 +234,6 @@ void move() {
     }
 }
 
-void move_monster() {
-    static DWORD previousTime = 0;
-    DWORD currentTime = GetTickCount64();
-
-    if (currentTime - previousTime >= MONSTER_SPEED) {
-        previousTime = currentTime;
-
-        monster_x++;
-
-        if (map[monster_y][monster_x + 1] != 0) {
-            monster_y++;
-        }
-        else {
-            monster_x++;
-        }
-
-        if (monster_x >= WIDTH) {
-            monster_x = WIDTH - 1;
-        }
-
-        if (monster_y >= HEIGHT) {
-            monster_y = HEIGHT - 1;
-        }
-    }
-}
 
 void UI() {
 
@@ -250,12 +283,15 @@ void Render() {
 
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
+                for (int x = 0; x < WIDTH; x++) {
+                    if (y == player_y && x == player_x) {
+
+                        sprintf(FPSTextInfo + index, "M ");
+                    }
+                }
                 if (y == player_y && x == player_x) {
 
                     sprintf(FPSTextInfo + index, "★ ");
-                }
-                else if (y == monster_y && x == monster_x) {
-                    sprintf(FPSTextInfo + index, "M ");
                 }
                 else if (map_copy[y][x] == EMPTY) {
                     sprintf(FPSTextInfo + index, "□ ");
@@ -278,7 +314,11 @@ void Render() {
                 else if (map_copy[y][x] == 7) {
                     sprintf(FPSTextInfo + index, "7 ");
                 }
-
+                for (int i = 0; i < numEnemies; i++) {
+                    if (y == enemies[i].y && x == enemies[i].x) {
+                        sprintf(FPSTextInfo + index, "M ");
+                    }
+                }
                 index += 2;
             }
 
@@ -467,6 +507,7 @@ void InstallStep() {
     Render();
     UI();
     move();
+    moveEnemies();
 }
 
 void WaveStep() {
@@ -501,7 +542,9 @@ int main() {
         {
         case 1:
             ScreenRelease();
+            spawnEnemy(0, 0, 10, 10);
             GameControl();
+
         case 2:
             //instruction();
             break;
