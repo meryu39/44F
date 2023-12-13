@@ -45,25 +45,41 @@ typedef struct Enemy {
     int x;
     int y;
     int hp;
+    bool islife;
 } enemy;
 
-enemy enemies[MAX_ENEMIES];
-int numEnemies = 0;
-
 typedef struct turret {
+    int x;
+    int y;
     int attackPower;
     int attackRange;
     int attackCycle;
 }Turret;
 
 
+enemy enemies[MAX_ENEMIES];
+int numEnemies = 0;
 
+Turret turreties[MAX];
+int numTurreties = 0;
+
+int distance;
+int range;
 
 void spawnEnemy(int x, int y, int hp) {
     enemies[numEnemies].x = x;
     enemies[numEnemies].y = y;
     enemies[numEnemies].hp = hp;
+    enemies[numEnemies].islife = true;
     numEnemies++;
+
+}
+void spawnTurret(int x, int y, int attackPower, int attackRange) {
+    turreties[numTurreties].x = x;
+    turreties[numTurreties].y = y;
+    turreties[numTurreties].attackPower = attackPower;
+    turreties[numTurreties].attackRange = attackRange;
+    numTurreties++;
 
 }
 bool isMove(int x, int y) {
@@ -85,13 +101,41 @@ void InitGame() {
         }
     }
 }
+void collider() {
 
+    static DWORD previousCollisionTime = 0;
+    DWORD currentTime = GetTickCount64();
+
+    if (currentTime - previousCollisionTime >= 1000) {
+        for (int i = 0; i < numEnemies; i++) {
+            int enemyX = enemies[i].x;
+            int enemyY = enemies[i].y;
+
+            for (int j = 0; j < numTurreties; j++) {
+                range = turreties[j].attackRange;
+                distance = abs(turreties[j].x - enemyX) + abs(turreties[j].y - enemyY);
+
+                if (distance <= range) {
+                    enemies[i].hp -= turreties[j].attackPower;
+
+                    if (enemies[i].hp <= 0) {
+                        enemies[i].islife = false;
+                        //ScreenPrint(90, 50, "%d번째 죽음 %d",i, enemies[i].islife);
+
+                    }
+                }
+            }
+        }
+
+        previousCollisionTime = currentTime;
+    }
+}
 void moveEnemies() {
 
         static DWORD previousTime = 0;
         DWORD currentTime = GetTickCount64();
 
-        if (currentTime - previousTime >= 300) {
+        if (currentTime - previousTime >= 500) {
             for (int i = 0; i < numEnemies; i++) {
                 int currentX = enemies[i].x;
                 int currentY = enemies[i].y;
@@ -108,6 +152,7 @@ void moveEnemies() {
 
                         enemies[i].x = currentX + dirX;
                         enemies[i].y = currentY + dirY;
+
 
                         map_copy[currentY][currentX] = PATH;
                         map_copy[currentY + dirY][currentX + dirX] = 4;
@@ -149,18 +194,23 @@ void selectTurret() {
         case 0:
             ScreenPrint(57, 7, "  AR  ");
             map[player_y][player_x] = 4;
+            spawnTurret(player_x, player_y, 3, 3);
+            
             break;
         case 1:
             ScreenPrint(57, 7, "  SMG ");
             map[player_y][player_x] = 5;
+            spawnTurret(player_x, player_y, 1, 2);
             break;
         case 2:
             ScreenPrint(57, 7, "  SR  ");
             map[player_y][player_x] = 6;
+            spawnTurret(player_x, player_y, 5, 5);
             break;
         case 3:
             ScreenPrint(57, 7, "  SG  ");
             map[player_y][player_x] = 7;
+            spawnTurret(player_x, player_y, 100, 1);
             break;
         default:
             break;
@@ -275,6 +325,7 @@ void UI() {
 
 }
 
+
 void Render() {
     ScreenClear();
 
@@ -282,13 +333,7 @@ void Render() {
         int index = 0;
 
         for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                for (int x = 0; x < WIDTH; x++) {
-                    if (y == player_y && x == player_x) {
-
-                        sprintf(FPSTextInfo + index, "M ");
-                    }
-                }
+            for (int x = 0; x < WIDTH; x++) {                
                 if (y == player_y && x == player_x) {
 
                     sprintf(FPSTextInfo + index, "★ ");
@@ -301,6 +346,9 @@ void Render() {
                 }
                 else if (map_copy[y][x] == PATH) {
                     sprintf(FPSTextInfo + index, "● ");
+                }
+                else if (map_copy[y][x] == 3) {
+                    sprintf(FPSTextInfo + index, "M ");
                 }
                 else if (map_copy[y][x] == 4) {
                     sprintf(FPSTextInfo + index, "4 ");
@@ -315,8 +363,10 @@ void Render() {
                     sprintf(FPSTextInfo + index, "7 ");
                 }
                 for (int i = 0; i < numEnemies; i++) {
-                    if (y == enemies[i].y && x == enemies[i].x) {
-                        sprintf(FPSTextInfo + index, "M ");
+                    if (enemies[i].islife) {
+                        if (y == enemies[i].y && x == enemies[i].x) {
+                            sprintf(FPSTextInfo + index, "M ");
+                        }
                     }
                 }
                 index += 2;
@@ -502,30 +552,59 @@ void PrintPath(int idx) {
 }
 
 void InstallStep() {
-    CurTime = clock();
+
     monsterPath();
     Render();
-    UI();
     move();
-    moveEnemies();
 }
+void spawnEnemyWave(int wave) {
+    static DWORD previousSpawnTime = 0;
+    DWORD currentTime = GetTickCount64();
 
+    if (currentTime - previousSpawnTime >= 1000) {
+        if (numEnemies <= 10) {  
+
+            int spawnX = 0;
+            int spawnY = 0;
+            int enemyHP = 100 + wave * 100;
+            
+
+
+            spawnEnemy(spawnX, spawnY, enemyHP);
+
+            // Update the spawn time
+            previousSpawnTime = currentTime;
+        }
+    }
+}
 void WaveStep() {
+    
 
 }
+
 
 void GameControl() {
     InitGame();
-
     ScreenInit();
     while(isPlaying){
+        CurTime = clock();
+        move();
+        UI();
+        monsterPath();
+
         if (!wavetime) {
             InstallStep();
         }
         else {
             //if(checkEnemy() == 0) wavetime = false;
+            
+            spawnEnemyWave(wave);
+            
+            collider();
+            Render();
+            moveEnemies();
+            
 
-            isPlaying = false;
         }
     }
 }
@@ -543,7 +622,7 @@ int main() {
         {
         case 1:
             ScreenRelease();
-            spawnEnemy(0, 0, 10);
+
             GameControl();
 
         case 2:
