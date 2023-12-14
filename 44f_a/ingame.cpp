@@ -13,10 +13,12 @@ clock_t CurTime, OldTime;
 int money = 5500;
 int life = 5;
 
+int allenemy = 0;
+
 bool isPlaying = true;
 bool wavetime = false;
 int wave = 0;
-
+bool endwave = false;
 int selectedTurret = 0;
 bool turretSelected = false;
 
@@ -45,6 +47,8 @@ typedef struct Enemy {
     int y;
     int hp;
     bool islife;
+    bool Damage;
+    bool del;
 } enemy;
 
 typedef struct turret {
@@ -54,6 +58,7 @@ typedef struct turret {
     int attackPower;
     int attackRange;
     int attackCycle;
+
 }Turret;
 
 typedef struct level {
@@ -77,11 +82,14 @@ int range;
 
 bool barricadeCaution = false;
 
+void InitializeEnemies();
 void spawnEnemy(int x, int y, int hp) {
     enemies[numEnemies].x = x;
     enemies[numEnemies].y = y;
     enemies[numEnemies].hp = hp;
     enemies[numEnemies].islife = true;
+    enemies[numEnemies].Damage = false;
+    enemies[numEnemies].del = false;
     numEnemies++;
 
 }
@@ -174,7 +182,7 @@ void collider() {
     static DWORD previousCollisionTime = 0;
     DWORD currentTime = GetTickCount64();
 
-    if (currentTime - previousCollisionTime >= 5000) {
+    if (currentTime - previousCollisionTime >= 1000) {
         for (int i = 0; i < numEnemies; i++) {
             int enemyX = enemies[i].x;
             int enemyY = enemies[i].y;
@@ -186,10 +194,12 @@ void collider() {
                 if (distance <= range) {
                     enemies[i].hp -= turreties[j].attackPower;
 
-                    if (enemies[i].hp <= 0) {
+                    if (enemies[i].hp <= 0 && !enemies[i].del) {
                         enemies[i].islife = false;
                         //ScreenPrint(90, 50, "%d번째 죽음 %d",i, enemies[i].islife);
+                        enemies[i].del = true;
                         numDestroyEnemies++;
+
                     }
                 }
             }
@@ -198,12 +208,13 @@ void collider() {
         previousCollisionTime = currentTime;
     }
 }
+
 void moveEnemies() {
 
         static DWORD previousTime = 0;
         DWORD currentTime = GetTickCount64();
 
-        if (currentTime - previousTime >= 1000) {
+        if (currentTime - previousTime >= 500) {
             for (int i = 0; i < numEnemies; i++) {
                 int currentX = enemies[i].x;
                 int currentY = enemies[i].y;
@@ -220,11 +231,17 @@ void moveEnemies() {
 
                         enemies[i].x = currentX + dirX;
                         enemies[i].y = currentY + dirY;
-
+                        
 
                         map_copy[currentY][currentX] = PATH;
                         //ap_copy[currentY + dirY][currentX + dirX] = 4;
-
+                        if (currentY + dirY == 19 && currentX + dirX == 19 && !enemies[i].Damage) {
+                            enemies[i].Damage = true;
+                            life -= 1;
+                            if (life < 0) {
+                                isPlaying = false;
+                            }
+                        }
                         break;
                     }
                 }
@@ -276,6 +293,7 @@ void selectTurret() {
         default:
             break;
         }
+
         ScreenFlipping();
     }
     turretSelected = false;
@@ -322,6 +340,8 @@ void move() {
             break;
         case F:
             wavetime = true;
+            InitializeEnemies();
+            wave++;
             break;
         case ARROWKEY: // Arrow keys
             key = _getch();
@@ -356,16 +376,24 @@ void move() {
     }
 }
 
+void InitializeEnemies() {
+    numEnemies = 0;
+    numDestroyEnemies = 0;
+    allenemy = 0;
+}
+
 void UI() {
     ScreenPrint(4, 28, "보유 포탑 : %3d", numTurreties);
-    ScreenPrint(4, 30, "남은 적의 수 : %3d", numEnemies - numDestroyEnemies);
+    ScreenPrint(4, 30, "남은 적의 수(필드) : %3d", numEnemies - numDestroyEnemies);
+    
+    ScreenPrint(4, 32, "나온 적의 수 : %3d",  allenemy);
 
     for (int i = 0; i < 20; i++) {
         ScreenPrint(50, 5 + i, "|");
     }
 
     if (wavetime) { 
-        ScreenPrint(70, 5, "%d wave", wave + 1);
+        ScreenPrint(70, 5, "%d wave", wave);
         ScreenPrint(68, 8, "웨이브 단계"); 
     }else{ 
         ScreenPrint(68, 8, "설치 단계  "); 
@@ -620,13 +648,31 @@ void spawnEnemyWave(int wave) {
             int enemyHP = 100 + wave * 100;
             
             spawnEnemy(spawnX, spawnY, enemyHP);
+            allenemy++;
+            if (allenemy == 11) {
+                endwave = true;
 
+
+            }
             // Update the spawn time
             previousSpawnTime = currentTime;
+            
+            
+        }
+    }
+
+}
+
+void findwave() {
+    if (endwave) {
+        ScreenPrint(4, 36, "적 에네미 %d", numEnemies);
+        if (numEnemies - numDestroyEnemies == 0) {
+            ScreenPrint(4, 34, "웨이브는 %d", wavetime);
+
+            wavetime = false;
         }
     }
 }
-
 
 void GameControl() {
     InitGame();
@@ -645,7 +691,7 @@ void GameControl() {
             collider();
             Render();
             moveEnemies();
-            
+            findwave();
         }
     }
 }
