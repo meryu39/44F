@@ -1,6 +1,5 @@
 ﻿#include "ingame.h"
 #include "screen.h"
-#define MAX_ENEMIES 5
 
 typedef struct Node {
     int x;
@@ -28,7 +27,7 @@ int vertex[HEIGHT][WIDTH]; //정점만 담은 이차원 배열
 int player_x = 19;
 int player_y = 19;
 
-
+int numDestroyEnemies = 0;
 
 int startIdx = -1, endIdx = -1;
 
@@ -97,7 +96,6 @@ void spawnTurret(int x, int y, int attackPower, int attackRange, int type) {
 }
 
 void levelup(int type) {
-    
     switch (type) {
     case AR:
         if (turretLevel.ARLevel == MAXLEVEL ||
@@ -145,6 +143,7 @@ void levelup(int type) {
         break;
     }
 }
+
 bool isMove(int x, int y) {
     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
         // 이동 가능한 경우
@@ -175,7 +174,7 @@ void collider() {
     static DWORD previousCollisionTime = 0;
     DWORD currentTime = GetTickCount64();
 
-    if (currentTime - previousCollisionTime >= 1000) {
+    if (currentTime - previousCollisionTime >= 5000) {
         for (int i = 0; i < numEnemies; i++) {
             int enemyX = enemies[i].x;
             int enemyY = enemies[i].y;
@@ -190,7 +189,7 @@ void collider() {
                     if (enemies[i].hp <= 0) {
                         enemies[i].islife = false;
                         //ScreenPrint(90, 50, "%d번째 죽음 %d",i, enemies[i].islife);
-
+                        numDestroyEnemies++;
                     }
                 }
             }
@@ -224,7 +223,7 @@ void moveEnemies() {
 
 
                         map_copy[currentY][currentX] = PATH;
-                        map_copy[currentY + dirY][currentX + dirX] = 4;
+                        //ap_copy[currentY + dirY][currentX + dirX] = 4;
 
                         break;
                     }
@@ -357,25 +356,24 @@ void move() {
     }
 }
 
-
-
 void UI() {
-
     ScreenPrint(4, 28, "보유 포탑 : %3d", numTurreties);
-    ScreenPrint(4, 30, "남은 적의 수 포탑 : %3d", numEnemies);
+    ScreenPrint(4, 30, "남은 적의 수 : %3d", numEnemies - numDestroyEnemies);
 
     for (int i = 0; i < 20; i++) {
         ScreenPrint(50, 5 + i, "|");
     }
-    ScreenPrint(70, 5, "%d wave", wave + 1);
 
     if (wavetime) { 
+        ScreenPrint(70, 5, "%d wave", wave + 1);
         ScreenPrint(68, 8, "웨이브 단계"); 
     }else{ 
         ScreenPrint(68, 8, "설치 단계  "); 
     }
 
     ScreenPrint(55, 12, "보유 골드: %5d", money);
+
+    ScreenPrint(55, 14, "남은 라이프 : %d", life);
 
     if(barricadeCaution)    ScreenPrint(54, 10, " 바리게이트위에 설치되지 않았습니다");
     else ScreenPrint(54, 10, "                                        ");
@@ -386,22 +384,11 @@ void UI() {
     ScreenPrint(80, 23, "3. SR");
     ScreenPrint(90, 23, "4. SG");
 
-    ScreenPrint(60, 25, "레벨 : %d", turretLevel.ARLevel);
-    ScreenPrint(70, 25, "레벨 : %d", turretLevel.SMGLevel);
-    ScreenPrint(80, 25, "레벨 : %d", turretLevel.SGLevel);
-    ScreenPrint(90, 25, "레벨 : %d", turretLevel.SRLevel);
+    ScreenPrint(60, 25, "레벨 : %2d", turretLevel.ARLevel);
+    ScreenPrint(70, 25, "레벨 : %2d", turretLevel.SMGLevel);
+    ScreenPrint(80, 25, "레벨 : %2d", turretLevel.SGLevel);
+    ScreenPrint(90, 25, "레벨 : %2d", turretLevel.SRLevel);
 
-    
-   /* ScreenPrint(50, 9, "웨이브 %d", wave);
-
-    ScreenPrint(50, 3, "현재 골드 %d", money);
-
-    if (!wavetime) {
-        ScreenPrint(50, 8, "포탑을 선택하려면 'e' 키를 누르고, 화살표 키로 종류를 선택하세요.");
-    }
-
-    ScreenPrint(50, 6, "AR  SMG  SR  SG");
-    ScreenPrint(50, 7, "선택한 포탑: ");*/
 
 }
 

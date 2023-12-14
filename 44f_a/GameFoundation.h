@@ -8,6 +8,7 @@
 #include <conio.h>
 #include <math.h>
 
+#define MAX_ENEMIES 20
 #define SPACEBAR 32
 #define E 101
 #define F 102
