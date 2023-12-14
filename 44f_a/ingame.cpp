@@ -198,7 +198,8 @@ void collider() {
                         enemies[i].islife = false;
                         //ScreenPrint(90, 50, "%d번째 죽음 %d",i, enemies[i].islife);
                         enemies[i].del = true;
-                        numDestroyEnemies++;
+                        numDestroyEnemies++; 
+                        money = money + 50;
 
                     }
                 }
