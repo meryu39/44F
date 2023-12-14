@@ -13,7 +13,8 @@
 #define E 101
 #define F 102
 #define ARROWKEY 224
-
+#define ESC 27 //게임종료 
+#define R 114   //점수초기화
 #define KEY1 49
 #define KEY2 50
 #define KEY3 51

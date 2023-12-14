@@ -70,10 +70,9 @@ void print_main() {
     ScreenPrint(75 - center, 10, "\\_| \\_/  \\/  \\/ \\_| |_/ \\___/ \\____/ \\_| \\_|\n");
 
     int center_2 = 8;
-    ScreenPrint(75 - center_2, 20, "1. 게임 시작");
-    ScreenPrint(75 - center_2, 24, "2. 게임 설명");
-    ScreenPrint(75 - center_2, 28, "3. 게임 랭킹");
-    ScreenPrint(75 - center_2, 32, "4. 게임 종료");
+    ScreenPrint(75 - center_2, 24, "1. 게임 시작");
+    ScreenPrint(75 - center_2, 31, "2. 게임 랭킹");
+    ScreenPrint(75 - center_2, 38, "3. 게임 종료");
 
     int center_3 = 37;
     ScreenPrint(75 - center_3, 45, "Copyright ⓒ 2023  44F  All Content cannot be copied without permission.");

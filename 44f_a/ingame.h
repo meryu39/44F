@@ -12,3 +12,4 @@ void Dijkstra(int startNodeIdx, int goalNodeIdx);
 void InitGame();
 
 void PrintMain();
+void InitializeEnemies();

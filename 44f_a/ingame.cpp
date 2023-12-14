@@ -42,6 +42,9 @@ int visitList[MAX];
 
 int direction[4][2] = { {1, 0},{0, 1}, {-1, 0}, {0, -1} };
 
+int rank[6]; //0,1,2,3,4,5,6
+int sorted[MAX];
+
 typedef struct Enemy {
     int x;
     int y;
@@ -82,7 +85,6 @@ int range;
 
 bool barricadeCaution = false;
 
-void InitializeEnemies();
 void spawnEnemy(int x, int y, int hp) {
     enemies[numEnemies].x = x;
     enemies[numEnemies].y = y;
@@ -162,8 +164,12 @@ bool isMove(int x, int y) {
 }
 
 void InitGame() {
+    isPlaying = true;
     life = 5;
-    money = 10000;
+    money = 500;
+
+    numTurreties = 0;
+    InitializeEnemies();
 
     turretLevel.ARLevel = 0;
     turretLevel.SMGLevel = 0;
@@ -177,6 +183,7 @@ void InitGame() {
         }
     }
 }
+
 void collider() {
 
     static DWORD previousCollisionTime = 0;
@@ -193,14 +200,15 @@ void collider() {
 
                 if (distance <= range) {
                     enemies[i].hp -= turreties[j].attackPower;
-
-                    if (enemies[i].hp <= 0 && !enemies[i].del) {
+                    
+                    if (enemies[i].hp <= 0 && !enemies[i].del ) {
                         enemies[i].islife = false;
                         //ScreenPrint(90, 50, "%d번째 죽음 %d",i, enemies[i].islife);
                         enemies[i].del = true;
                         numDestroyEnemies++; 
                         money = money + 50;
-
+                        enemies[i].x = 0;
+                        enemies[i].y = 0;
                     }
                 }
             }
@@ -238,6 +246,7 @@ void moveEnemies() {
                         //ap_copy[currentY + dirY][currentX + dirX] = 4;
                         if (currentY + dirY == 19 && currentX + dirX == 19 && !enemies[i].Damage) {
                             enemies[i].Damage = true;
+                            enemies[i].islife = false;
                             life -= 1;
                             if (life < 0) {
                                 isPlaying = false;
@@ -251,9 +260,97 @@ void moveEnemies() {
         }
     }
 
+void merge(int list[], int left, int mid, int right)
+{
+    int i, j, k, l;
+    i = left; j = mid + 1; k = left;
+    // 분할 정렬된 list의 합병 (내림차순)
+    while (i <= mid && j <= right) {
+        if (list[i] >= list[j]) sorted[k++] = list[i++];
+        else sorted[k++] = list[j++];
+    }
+    // 남아 있는 레코드의 일괄 복사 (왼쪽 부분)
+    while (i <= mid) {
+        sorted[k++] = list[i++];
+    }
+    // 남아 있는 레코드의 일괄 복사 (오른쪽 부분)
+    while (j <= right) {
+        sorted[k++] = list[j++];
+    }
+    // 배열 sorted[]의 리스트를 배열 list[]로 복사
+    for (l = left; l <= right; l++)
+        list[l] = sorted[l];
+}
+
+void merge_sort(int list[], int left, int right)
+{
+    int mid;
+    if (left < right)
+    {
+        mid = (left + right) / 2; // 리스트의 균등분할
+        merge_sort(list, left, mid); // 부분리스트 정렬
+        merge_sort(list, mid + 1, right);//부분리스트 정렬
+        merge(list, left, mid, right); // 합병
+    }
+}
+
+void FileLoad() {
+    int i;
+    FILE* file;
+    file = fopen("score.txt", "rt");
+
+    if (file == NULL) { //오류 or 파일 없을시 새로 생성 
+        file = fopen("score.txt", "a");
+        fclose(file);
+        return;
+    }
+
+    for (i = 0; i < 5; i++)
+        fscanf(file, "%d\n", &rank[i]);
+
+    fclose(file);
+}
+
+void FileSave(void)
+{
+    int i;
+    FILE* file;
+    file = fopen("score.txt", "wt");
+    if (!file) {
+        perror("파일 쓰기실패");
+        exit(1);
+    }
+
+    for (i = 0; i < 5; i++) {
+        if (rank[i] <= 0) //점수가 0점이면
+            fprintf(file, "0\n");
+        else
+            fprintf(file, "%d \n", rank[i]);
+    }
+    fclose(file);
+}
+
+void reset_rank() {
+    for (int i = 0; i < 6; i++) {
+        rank[i] = 0;
+    }
+    FileSave();
+}
+
+void add_rank(int n) {
+    FileLoad();
+    rank[5] = n;
+    merge_sort(rank, 0, 6);
+    FileSave();
+
+    if (rank[0] == n) {
+        ScreenPrint(20, 14, "★★ BEST SCORE!! ★★");
+    }
+}
 
 void selectTurret() {
     int currentattack = 0;
+    money -= 50;
     while (!turretSelected) {
         int selectedTurret = rand() % 4;
         turretSelected = true;
@@ -413,10 +510,10 @@ void UI() {
     ScreenPrint(80, 23, "3. SR");
     ScreenPrint(90, 23, "4. SG");
 
-    ScreenPrint(60, 25, "레벨 : %2d", turretLevel.ARLevel);
-    ScreenPrint(70, 25, "레벨 : %2d", turretLevel.SMGLevel);
-    ScreenPrint(80, 25, "레벨 : %2d", turretLevel.SGLevel);
-    ScreenPrint(90, 25, "레벨 : %2d", turretLevel.SRLevel);
+    ScreenPrint(60, 25, "레벨 :%2d", turretLevel.ARLevel);
+    ScreenPrint(70, 25, "레벨 :%2d", turretLevel.SMGLevel);
+    ScreenPrint(80, 25, "레벨 :%2d", turretLevel.SGLevel);
+    ScreenPrint(90, 25, "레벨 :%2d", turretLevel.SRLevel);
 
 
 }
@@ -671,6 +768,30 @@ void findwave() {
             ScreenPrint(4, 34, "웨이브는 %d", wavetime);
 
             wavetime = false;
+
+            for (int i = 0; i < MAX_ENEMIES; i++) {
+                enemies[i].x = 0;
+                enemies[i].y = 0; 
+            }
+        }
+    }
+}
+void GameOver() {
+    ScreenInit();
+    ScreenPrint(18, 7, "------------------------");
+    ScreenPrint(18, 8, "+       GameOver       +");
+    ScreenPrint(18, 9, "------------------------");
+
+    ScreenPrint(20, 14, "Your score");
+    ScreenPrint(20, 16, "=> 점수: %d\n", wave);
+
+    add_rank(wave);
+    ScreenFlipping();
+
+    while (1) {
+        if (_kbhit()) {
+            ScreenRelease();
+            return;
         }
     }
 }
@@ -695,30 +816,68 @@ void GameControl() {
             findwave();
         }
     }
+    ScreenRelease();
+    GameOver();
 }
+
+void Ranking() {
+
+    ScreenInit();
+    FileLoad();
+    
+    ScreenPrint(20, 7, "------------------------");
+    ScreenPrint(20, 8, "+       HI-SCORE       +");
+    ScreenPrint(20, 9, "------------------------");
+
+    for (int i = 0; i < 5; i++) {
+        ScreenPrint(16, 12 + (2 * i), "No. % d . . . . . . . . . . % d             ", i + 1, rank[i]);
+    }
+
+    ScreenPrint(9, 23, "※ 'R' 키를 누르면 점수 기록이 초기화 됩니다 ※");
+
+    ScreenPrint(9, 26, "▶ 메인화면으로 돌아가려면 ESC 키를 누르세요 ◀");
+
+    ScreenFlipping();
+
+    while (1) {
+        if (_kbhit()) {
+            int key = _getch();
+            if (key == R) {
+                reset_rank();
+                for (int i = 0; i < 5; i++) {
+                    ScreenPrint(16, 12 + (2 * i),"No. % d . . . . . . . . . . % d       ", i + 1, rank[i]);
+                    ScreenFlipping();
+                }
+            }
+            else if (key == ESC) {
+                ScreenRelease();
+                return;
+            }
+        }
+    }
+}
+
 
 int main() {
     CurTime = OldTime = clock();
     memset(FPSTextInfo, '\0', 1024);
 
-    ScreenInit();
     int p = 0;
     
     while (1) {
+        ScreenInit();
         p = MainSelected();
         switch (p)
         {
         case 1:
             ScreenRelease();
             GameControl();
-
+            break;
         case 2:
-            //instruction();
+            ScreenRelease();
+            Ranking();
             break;
         case 3:
-            //Ranking();
-            break;
-        case 4:
             ScreenRelease();
             return 0;
             break;
@@ -726,6 +885,7 @@ int main() {
             break;
         }
         p = NULL;
+        break;
     }
     ScreenRelease();
     return 0;
